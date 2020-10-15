@@ -15,11 +15,17 @@ router.get('/', (req, res) => {
       }
     ]
   })
-    .then((products) => res.json(products))
+    .then(products => {
+      if (!products) {
+        res.status(404).json({ message: 'No post found with this id' });
+        return;
+      }
+      res.json(products);
+    })
     .catch(err => {
       console.log(err);
       res.status(500).json(err);
-    });
+    })
 });
 
 // get one product
@@ -102,7 +108,7 @@ router.put('/:id', (req, res) => {
       const productTagsToRemove = productTags
         .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
         .map(({ id }) => id);
- 
+
       // run both actions
       return Promise.all([
         ProductTag.destroy({ where: { id: productTagsToRemove } }),
