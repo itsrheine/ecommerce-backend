@@ -8,13 +8,10 @@ router.get('/', (req, res) => {
   // find all products
   Product.findAll({
     include: [
-      {
-        model: Category,
-        attributes: ['id', 'category_name']
-      },
+      Category,
       {
         model: Tag,
-        attributes: ['id', 'tag_name']
+        through: ProductTag
       }
     ]
   })
@@ -22,7 +19,7 @@ router.get('/', (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).json(err);
-    })
+    });
 });
 
 // get one product
@@ -33,13 +30,10 @@ router.get('/:id', (req, res) => {
       id: req.params.id
     },
     include: [
-      {
-        model: Category,
-        attributes: ['id', 'category_name']
-      },
+      Category,
       {
         model: Tag,
-        attributes: ['id', 'tag_name']
+        through: ProductTag
       }
     ]
   })
@@ -108,7 +102,7 @@ router.put('/:id', (req, res) => {
       const productTagsToRemove = productTags
         .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
         .map(({ id }) => id);
-
+ 
       // run both actions
       return Promise.all([
         ProductTag.destroy({ where: { id: productTagsToRemove } }),
